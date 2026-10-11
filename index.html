@@ -14,10 +14,153 @@
     <meta name="twitter:description" content="Git Visualizer — interactive visual cheatsheet for Git commands." />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./assets/fonts/fonts.css" />
-    <link rel="stylesheet" crossorigin="" href="./assets/index.css" />
+    <link rel="stylesheet" crossorigin="" href="./assets/index.css?v=2" />
+    <style>
+      /* Ensure Local Repo column blends into dark mode beautifully */
+      html.dark svg rect[fill="#EFF6F7"],
+      html.dark svg rect[fill="#eff6f7"],
+      html.dark svg rect[fill="#EDF6F7"],
+      html.dark svg rect[fill="#edf6f7"],
+      html.dark #columns > g:nth-child(4) rect {
+        fill: #112022 !important;
+      }
+
+      html.dark svg text[style*="fill: rgb(11, 131, 122)"],
+      html.dark svg text[style*="fill: #0B837A"],
+      html.dark #columns > g:nth-child(4) text.font-bold {
+        fill: #2dd4bf !important;
+      }
+
+      html.dark svg line[stroke="#0B837A"],
+      html.dark svg line[stroke="#0b837a"],
+      html.dark svg rect[stroke="#0B837A"],
+      html.dark svg rect[stroke="#0b837a"],
+      html.dark #columns > g:nth-child(4) line {
+        stroke: #2dd4bf !important;
+      }
+    </style>
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('git_visualizer_theme');
+          if (saved === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <script type="module" crossorigin="" src="./assets/index.js"></script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Theme Toggle Control -->
+    <div id="theme-toggle-wrapper" style="position: fixed; top: 1rem; left: 1.5rem; z-index: 9999;">
+      <button
+        id="theme-toggle-btn"
+        class="theme-toggle-btn"
+        type="button"
+        aria-label="Switch to dark mode"
+        title="Toggle theme (Light / Dark)"
+        tabindex="0"
+      >
+        <span id="theme-toggle-icon" class="theme-toggle-icon" aria-hidden="true"></span>
+        <span id="theme-toggle-text">Dark</span>
+      </button>
+    </div>
+
+    <script>
+      (function() {
+        var sunSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+        var moonSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+
+        function updateUI(isDark) {
+          var btn = document.getElementById('theme-toggle-btn');
+          var icon = document.getElementById('theme-toggle-icon');
+          var text = document.getElementById('theme-toggle-text');
+          if (!btn || !icon || !text) return;
+
+          if (isDark) {
+            icon.innerHTML = sunSvg;
+            text.textContent = 'Light';
+            btn.setAttribute('aria-label', 'Switch to light mode');
+            btn.setAttribute('title', 'Switch to light mode');
+          } else {
+            icon.innerHTML = moonSvg;
+            text.textContent = 'Dark';
+            btn.setAttribute('aria-label', 'Switch to dark mode');
+            btn.setAttribute('title', 'Switch to dark mode');
+          }
+        }
+
+        function setTheme(theme) {
+          var isDark = theme === 'dark';
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+          try {
+            localStorage.setItem('git_visualizer_theme', theme);
+          } catch (e) {}
+          updateUI(isDark);
+        }
+
+        function toggleTheme() {
+          var isDark = document.documentElement.classList.contains('dark');
+          setTheme(isDark ? 'light' : 'dark');
+        }
+
+        // Initialize state
+        var isDark = document.documentElement.classList.contains('dark');
+        updateUI(isDark);
+
+        var btn = document.getElementById('theme-toggle-btn');
+        if (btn) {
+          btn.addEventListener('click', toggleTheme);
+          btn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleTheme();
+            }
+          });
+        }
+
+        // Try mounting inside the header's left slot once React renders
+        function tryMount() {
+          var header = document.querySelector('header');
+          var wrapper = document.getElementById('theme-toggle-wrapper');
+          if (header && wrapper) {
+            var leftSlot = header.firstElementChild;
+            if (leftSlot && leftSlot !== wrapper && leftSlot.parentNode === header) {
+              wrapper.style.position = 'static';
+              wrapper.style.margin = '0';
+              leftSlot.style.display = 'flex';
+              leftSlot.style.alignItems = 'center';
+              if (wrapper.parentNode !== leftSlot) {
+                leftSlot.appendChild(wrapper);
+              }
+              return true;
+            }
+          }
+          return false;
+        }
+
+        if (!tryMount()) {
+          var observer = new MutationObserver(function() {
+            if (tryMount()) {
+              observer.disconnect();
+            }
+          });
+          observer.observe(document.body, { childList: true, subtree: true });
+        }
+      })();
+    </script>
   </body>
 </html>
