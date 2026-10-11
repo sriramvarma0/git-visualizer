@@ -324,4 +324,79 @@ html.dark .theme-toggle-btn:hover {
   justify-content: center;
 }
 
+/* Keep the workflow as a static, aspect-ratio-preserving canvas on smaller screens. */
+html,
+body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 1023px) {
+  #root > div {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible !important;
+  }
+
+  #root > div > svg[viewBox="0 0 2460 1470"] {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    flex: none !important;
+    display: block;
+  }
+}
+
+@media (max-width: 767px) {
+  #root > div > div:first-child {
+    min-height: 94px;
+    height: auto;
+    padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #root > div > div:first-child > div:first-child {
+    gap: 8px;
+  }
+
+  #root > div > div:first-child h1 {
+    font-size: 22px;
+  }
+
+  #root > div > div:first-child > div:nth-child(2) {
+    position: static;
+    transform: none;
+    gap: 12px;
+    font-size: 11px;
+  }
+
+  #theme-toggle-wrapper {
+    top: max(10px, env(safe-area-inset-top));
+    left: 12px;
+  }
+
+  .theme-toggle-btn {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 374px) {
+  #root > div > div:first-child {
+    min-height: 88px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  #root > div > div:first-child h1 {
+    font-size: 20px;
+  }
+
+  #root > div > div:first-child > div:nth-child(2) {
+    gap: 8px;
+    font-size: 10px;
+  }
+}
+
 
